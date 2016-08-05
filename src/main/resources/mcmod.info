@@ -1,0 +1,16 @@
+[
+{
+  "modid": "remotecraft",
+  "name": "Remotecraft",
+  "description": "",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "http://github.com/Zireck/Remotecraft",
+  "updateUrl": "",
+  "authorList": ["Zireck"],
+  "credits": "Kudos to everyone",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
