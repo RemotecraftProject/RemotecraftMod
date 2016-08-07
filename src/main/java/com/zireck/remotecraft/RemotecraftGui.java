@@ -1,16 +1,9 @@
 package com.zireck.remotecraft;
 
-import net.glxn.qrgen.core.image.ImageType;
-import net.glxn.qrgen.javase.QRCode;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiLabel;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.util.ResourceLocation;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -18,13 +11,25 @@ import java.io.IOException;
  */
 public class RemotecraftGui extends GuiScreen {
 
-    private ResourceLocation mResourceLocation = null;
+    private String mIpAddress;
+
     private GuiButton mButtonClose;
+    private GuiLabel mLabelIpAddress;
+
+    private IpAddressManager mIpAddressManager;
+    private QrCodeManager mQrCodeManager;
 
     @Override
     public void initGui() {
         super.initGui();
-        this.buttonList.add(mButtonClose = new GuiButton(0, this.width / 2 - 100, this.height - (this.height / 4) + 10, "Close GUI"));
+        this.buttonList.add(mButtonClose = new GuiButton(0, this.width / 2 - 100, this.height - (this.height / 4) + 10, "Close"));
+        this.labelList.add(mLabelIpAddress = new GuiLabel(fontRendererObj, 1, this.width / 2 - 20, this.height / 2 + 40, 300, 20, 0xFFFFFF));
+
+        mIpAddressManager = new IpAddressManager();
+        mIpAddress = mIpAddressManager.getIpAddress();
+        mQrCodeManager = new QrCodeManager(mIpAddress);
+
+        mLabelIpAddress.addLine(mIpAddress);
     }
 
     @Override
@@ -38,8 +43,10 @@ public class RemotecraftGui extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
 
-        generateQrCode();
-        renderQrCode();
+        if (mQrCodeManager != null) {
+            mQrCodeManager.generateQrCode();
+            mQrCodeManager.renderQrCode(this);
+        }
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
@@ -47,29 +54,5 @@ public class RemotecraftGui extends GuiScreen {
     @Override
     public boolean doesGuiPauseGame() {
         return true;
-    }
-
-    private void generateQrCode() {
-        if (mResourceLocation != null) {
-            return;
-        }
-
-        BufferedImage bufferedImage = null;
-        File imageFile = QRCode.from("hello!").to(ImageType.PNG).withSize(256, 256).file();
-
-        try {
-            bufferedImage = ImageIO.read(imageFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        mResourceLocation = Minecraft.getMinecraft().renderEngine.getDynamicTextureLocation(imageFile.getName(), new DynamicTexture(bufferedImage));
-    }
-
-    private void renderQrCode() {
-        if (mResourceLocation != null) {
-            Minecraft.getMinecraft().getTextureManager().bindTexture(mResourceLocation);
-            drawModalRectWithCustomSizedTexture(width / 2 - 64, height / 2 - (90), 0, 0, 128, 128, 128, 128);
-        }
     }
 }
