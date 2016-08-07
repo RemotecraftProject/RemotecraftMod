@@ -18,24 +18,27 @@ import java.io.IOException;
  */
 public class RemotecraftGui extends GuiScreen {
 
-    //private GuiButton a;
+    private ResourceLocation mResourceLocation = null;
+    private GuiButton mButtonClose;
 
     @Override
     public void initGui() {
-        //this.buttonList.add(this.a = new GuiButton(0, this.width / 2 - 100, this.height / 2 - 24, "This is button a"));
+        super.initGui();
+        this.buttonList.add(mButtonClose = new GuiButton(0, this.width / 2 - 100, this.height - (this.height / 4) + 10, "Close GUI"));
     }
 
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
-        /*if (button == this.a) {
-            System.out.println("Button clicked!!!");
-        }*/
+        if (button == mButtonClose) {
+            mc.thePlayer.closeScreen();
+        }
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
 
+        generateQrCode();
         renderQrCode();
 
         super.drawScreen(mouseX, mouseY, partialTicks);
@@ -46,10 +49,13 @@ public class RemotecraftGui extends GuiScreen {
         return true;
     }
 
-    private void renderQrCode() {
-        ResourceLocation resourceLocation = null;
+    private void generateQrCode() {
+        if (mResourceLocation != null) {
+            return;
+        }
+
         BufferedImage bufferedImage = null;
-        File imageFile = QRCode.from("hello!").to(ImageType.JPG).file();
+        File imageFile = QRCode.from("hello!").to(ImageType.PNG).withSize(256, 256).file();
 
         try {
             bufferedImage = ImageIO.read(imageFile);
@@ -57,9 +63,13 @@ public class RemotecraftGui extends GuiScreen {
             e.printStackTrace();
         }
 
-        resourceLocation = Minecraft.getMinecraft().renderEngine.getDynamicTextureLocation(imageFile.getName(), new DynamicTexture(bufferedImage));
-        Minecraft.getMinecraft().getTextureManager().bindTexture(resourceLocation);
+        mResourceLocation = Minecraft.getMinecraft().renderEngine.getDynamicTextureLocation(imageFile.getName(), new DynamicTexture(bufferedImage));
+    }
 
-        this.drawTexturedModalRect(this.width / 2 - 128, this.height / 2 - 128, 0, 0, 256, 256);
+    private void renderQrCode() {
+        if (mResourceLocation != null) {
+            Minecraft.getMinecraft().getTextureManager().bindTexture(mResourceLocation);
+            drawModalRectWithCustomSizedTexture(width / 2 - 64, height / 2 - (90), 0, 0, 128, 128, 128, 128);
+        }
     }
 }
